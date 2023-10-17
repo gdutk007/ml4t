@@ -1,0 +1,44 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.6.7, pytest-5.0.1, py-1.7.0, pluggy-0.13.1
+rootdir: /Users/gianfranco.dutka/Documents/ML4T/marketsim
+plugins: json-0.4.0
+collected 13 items
+
+grade_marketsim.py <_io.StringIO object at 0x7fb088bbcb88>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+.<_io.StringIO object at 0x7fb088b76dc8>
+.<_io.StringIO object at 0x7fb088bd3ca8>
+..[GRADER] Writing points to "points.txt"...
+[GRADER] Writing comments to "comments.txt"...
+
+--- Summary ---
+Tests passed: 13 out of 13
+
+--- Details ---
+Test #0: passed 
+Test #1: passed 
+Test #2: passed 
+Test #3: passed 
+Test #4: passed 
+Test #5: passed 
+Test #6: passed 
+Test #7: passed 
+Test #8: passed 
+Test #9: passed 
+Test #10: passed 
+Test #11: passed 
+Test #12: passed 
+
+No performance metric collected, skipping
+[GRADER] Done!
+
+
+========================== 13 passed in 2.65 seconds ===========================
