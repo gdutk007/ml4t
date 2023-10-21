@@ -11,6 +11,25 @@ import pandas as pd
 from util import get_data, plot_data
 import matplotlib.pyplot as plt
 
+
+
+def getCCI(dates):
+   df = pd.DataFrame(index=dates)
+   # get High, Low, and adj close
+   df['High'] = get_data(["JPM"], dates, addSPY=False, colname="High")
+   df['Low'] = get_data(["JPM"], dates, addSPY=False, colname="Low")
+   df['Close'] = get_data(["JPM"], dates, addSPY=False, colname="Close")
+   # ffill and bfill
+   df.fillna(method='ffill', inplace=True)
+   df.fillna(method='bfill', inplace=True)
+
+   # get tp values
+   df['tp'] = (df['High'] + df['Low'] + df['Close']) / 3
+   df['sma'] = df['tp'].rolling(14).mean()
+   df['mad'] = df['tp'].rolling(14).apply(lambda x: pd.Series(x).mad(),raw=True)
+   df['CCI'] = (df['tp'] - df['sma']) / (0.015 * df['mad'])
+   return df
+
 def getMomentum(prices):
    momentum = pd.DataFrame(index=prices.index)
    momentum['momentum'] = 0.0
@@ -44,7 +63,7 @@ def getBollingerBand(prices):
 
 # get indicators will return Bollinger bands, price/SMA crossover, RSI
 
-def getIndicators(prices):
+def getIndicators(prices, start_date, end_date):
    # normalize prices
    normed_prices = prices/prices.iloc[0][0]
    
@@ -61,9 +80,9 @@ def getIndicators(prices):
    df_indicators['sma'].plot(grid=True, linewidth= 0.8)
    plt.xlabel('dates')
    plt.ylabel('Normalized return')
-   plt.title('sma and price/sma')
+   plt.title('price/sma cross')
    plt.legend(["price","sma","price/sma"])
-   plt.savefig('./images/sma-smaRatio.png')
+   plt.savefig('./images/price-sma-cross.png')
    plt.clf()
    
    # 2. bollinger bands
@@ -90,7 +109,7 @@ def getIndicators(prices):
    ax_2 = df_indicators['momentum'].plot(grid=True,ax=axes_1[1], label='momentum', linewidth=1, color='black' )
    ax_1.legend(['price'])
    ax_1.set_xticks([])
-   ax_2.axhline(linewidth=0.8, color='r',linestyle='--')
+   ax_2.axhline(linewidth=1, color='r',linestyle='--')
    ax_2.legend(['momentum','buy-sell line'])
    ax_1.set_ylabel('price')
    ax_2.set_xlabel('date')
@@ -101,14 +120,22 @@ def getIndicators(prices):
    plt.clf()
 
    # 4. cci
-   cci = (normed_prices - normed_prices.rolling(window=20).mean() )/(2.5-normed_prices.std())
-   df_indicators['cci'] = cci
-   df_indicators['price'].plot(grid=True,label='price', linewidth=1 )
-   df_indicators['cci'].plot(grid=True,label='cci', linewidth=1 )
+   #import pdb;pdb.set_trace()
+   fig, axes_2 = plt.subplots(nrows=2)
+   cci = getCCI(prices.index)#(prices - prices.rolling(window=20).mean() )/(2.5-prices.std())
+   chart1 = df_indicators['price'].plot(ax=axes_2[0],grid=True,label='price', linewidth=1, color='blue' )
+   chart2 = cci['CCI'].plot(ax=axes_2[1],grid=True,label='cci', linewidth=1, color='red')
+   chart1.set_xticks([])
+   chart2.set_xlabel('date')
+   chart1.set_title('Commodity Channel Index')
+   chart1.set_ylabel('price')
+   chart2.set_ylabel('cci')
+   chart1.legend(['price'])
+   chart2.legend(['cci'])
+   chart2.axhline(y=100, linewidth=0.8, color='black',linestyle='--')
+   chart2.axhline(y=-100, linewidth=0.8, color='black',linestyle='--')
    plt.xlabel('dates')
-   plt.ylabel('Normalized price')
-   plt.title('Commodity Channel Index')
-   plt.legend(["price","cci"])
+   plt.ylabel('cci')
    plt.savefig('./images/cci.png')
    plt.clf()
 

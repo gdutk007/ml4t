@@ -82,6 +82,6 @@ if __name__ == "__main__":
    prices.fillna(method='bfill', inplace=True)
    # only keep data for symbols in our portfolio
    prices.drop(columns=["SPY"], inplace=True)
-   getIndicators(prices)
+   getIndicators(prices, start_date, end_date)
 
 
