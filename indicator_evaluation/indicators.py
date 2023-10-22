@@ -11,7 +11,8 @@ import pandas as pd
 from util import get_data, plot_data
 import matplotlib.pyplot as plt
 
-
+def author(): 
+  return 'gdutka3'
 
 def getCCI(dates):
    df = pd.DataFrame(index=dates)

@@ -11,7 +11,6 @@ from util import get_data, plot_data
 def author(): 
   return 'gdutka3'
 
-
 def testPolicy(symbol="JPM", st=dt.datetime(2008,1,1), ed=dt.datetime(2009,12,31), sv=100000):
    # Read in adjusted closing prices for given symbols, date range  		  	   		  		 		  		  		    	 		 		   		 		  
    dates = pd.date_range(st, ed)

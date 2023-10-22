@@ -31,18 +31,11 @@ def calculate_stats(port_vals):
 
 
 def printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals):
-   print()
-   print()
-   print(f"Sharpe Ratio of Fund: {sharpe_ratio}")  		  	   		  		 		  		  		    	 		 		   		 		  
-   print()  		  	   		  		 		  		  		    	 		 		   		 		  
-   print(f"Cumulative Return of Fund: {cum_ret}")  		  	   		  		 		  		  		    	 		 		   		 		  
-   print()  		  	   		  		 		  		  		    	 		 		   		 		  
-   print(f"Standard Deviation of Fund: {std_daily_ret}")  		  	   		  		 		  		  		    	 		 		   		 		  
-   print()  		  	   		  		 		  		  		    	 		 		   		 		  
-   print(f"Average Daily Return of Fund: {avg_daily_ret}")  		  	   		  		 		  		  		    	 		 		   		 		  
-   print()  		  	   		  		 		  		  		    	 		 		   		 		  
+   print(f"Sharpe Ratio of portfolio: {sharpe_ratio}")  		  	   		  		 		  		  		    	 		 		   		 		  	 		  
+   print(f"Cumulative Return of portfolio: {cum_ret}")  		  	   		  		 		  		  		    	 		 		   		 		  	 		  
+   print(f"Standard Deviation of portfolio: {std_daily_ret}")  		  	   		  		 		  		  		    	 		 		   		 		  	 		  
+   print(f"Average Daily Return of portfolio: {avg_daily_ret}")  		  	   		  		 		  		  		    	 		 		   		 		  	 		  
    print(f"Final Portfolio Value: {portVals.iloc[-1][0]}")
-   print()
    print()
 
 if __name__ == "__main__":
@@ -59,14 +52,17 @@ if __name__ == "__main__":
 
    # get data and print it for optimal trades and benchmark trades
    cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = calculate_stats(portVals.to_numpy())
+   print()
+   print('Statistics of Optimal Strategy:\n')
    printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals)
    cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = calculate_stats(benchportVals.to_numpy())
+   print('Statistics of Benchmark:\n')
    printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, benchportVals)
    
    portVals = portVals/portVals.iloc[0]
    benchportVals = benchportVals/benchportVals.iloc[0]
-   ax = portVals.plot()
-   benchportVals.plot(ax=ax)
+   ax = portVals.plot(color='red')
+   benchportVals.plot(ax=ax,color='purple')
    plt.xlabel('dates')
    plt.ylabel('Normalized return')
    plt.title('Optimal Strategy vs Benchmark')
