@@ -25,24 +25,24 @@ def testPolicy(symbol="JPM", st=dt.datetime(2008,1,1), ed=dt.datetime(2009,12,31
    # filling in trades table
    prev = 0.0
    for i in range(len(prices)-1):
-      if prices.iloc[i][0] < prices.iloc[i+1][0]:
+      if prices.iloc[i][0] > prices.iloc[i+1][0]:
          if prev == 1000:
-            trades.iloc[i][0]= 0
-         elif prev == 0:
-            trades.iloc[i][0]= 1000
-            prev += 1000
-         elif prev == -1000:
-            trades.iloc[i][0]= 2000
-            prev += 2000
-      elif prices.iloc[i][0] > prices.iloc[i+1][0]:
-         if prev == 1000:
-            trades.iloc[i][0]= -2000
             prev += -2000
+            trades.iloc[i][0]= -2000
          elif prev == 0:
-            trades.iloc[i][0]= -1000
             prev += -1000
+            trades.iloc[i][0]= -1000
          elif prev == -100:
             trades.iloc[i][0]= 0
+      elif prices.iloc[i][0] < prices.iloc[i+1][0]:
+         if prev == 1000:
+            trades.iloc[i][0]= 0
+         elif prev == 0:
+            prev += 1000
+            trades.iloc[i][0]= 1000
+         elif prev == -1000:
+            prev += 2000
+            trades.iloc[i][0]= 2000
       else:
          trades.iloc[i][0]= 0
    return trades
