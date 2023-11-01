@@ -130,7 +130,7 @@ class QLearner(object):
     
     def author(self):
         return 'gdutka3'
-
-
+    
+    
 if __name__ == "__main__":
     print("Remember Q from Star Trek? Well, this isn't him")
