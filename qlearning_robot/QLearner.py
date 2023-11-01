@@ -67,10 +67,10 @@ class QLearner(object):
         self.verbose=verbose
         self.Q = np.zeros((self.num_states ,self.num_actions))
         if self.dyna:
-            self.T_counter = np.zeros(shape=(num_states, num_actions, num_states))
+            self.Tc = np.zeros(shape=(num_states, num_actions, num_states))
+            self.T = self.Tc/self.Tc.sum(axis=2,keepdims=True)
             # fill using video value
-            self.T_counter.fill(0.00001)
-            self.T = self.T_counter/self.T_counter.sum(axis=2,keepdims=True)
+            self.Tc.fill(0.00001)
             self.R = np.ndarray(shape=(num_states, num_actions))
             self.R.fill(-1.0)
 
@@ -110,9 +110,9 @@ class QLearner(object):
         
         self.rar *= self.radr # moving this line after dyna breaks everything on m1 mac
         if self.dyna:
-            self.T_counter[self.s,self.a,s_prime]=self.T_counter[self.s,self.a,s_prime]+1
-            self.T=self.T_counter/self.T_counter.sum(axis=2,keepdims=True)
-            self.R[self.s, self.a]=(1 - self.alpha) * self.R[self.s, self.a] + (self.alpha * r)
+            self.Tc[self.s,self.a,s_prime] += 1
+            self.T=self.Tc/self.Tc.sum(axis=2,keepdims=True)
+            self.R[self.s, self.a]=self.R[self.s, self.a]*(1 - self.alpha)+(self.alpha * r)
             for i in range(0, self.dyna):
                 #pick random a and s
                 sFake = np.random.randint(0,self.num_states)
