@@ -66,6 +66,13 @@ class QLearner(object):
         self.dyna=dyna
         self.verbose=verbose
         self.Q = np.zeros((self.num_states ,self.num_actions))
+        if self.dyna:
+            self.T_counter = np.zeros(shape=(num_states, num_actions, num_states))
+            # fill using video value
+            self.T_counter.fill(0.00001)
+            self.T = self.T_counter/self.T_counter.sum(axis=2,keepdims=True)
+            self.R = np.ndarray(shape=(num_states, num_actions))
+            self.R.fill(-1.0)
 
     def querysetstate(self, s):
         """
@@ -75,8 +82,13 @@ class QLearner(object):
         :return: The selected action
         :rtype: int
         """
-        action = np.argmax(self.Q[s])
         self.s = s
+        if rand.uniform(0.0, 1.0) < self.rar:
+            action = rand.randint(0, self.num_actions - 1)
+        else:
+            action = np.argmax(self.Q[s])
+        if self.verbose:
+            print(f"s = {s}, a = {action}")
         return action
 
     def query(self, s_prime, r):
@@ -89,20 +101,33 @@ class QLearner(object):
         :return: The selected action
         :rtype: int
         """
-        self.update_Q(self.s,self.a,s_prime,r)
+        self.Q[self.s,self.a]=(1-self.alpha)*self.Q[self.s,self.a]+self.alpha*(r+self.gamma*self.Q[s_prime, np.argmax(self.Q[s_prime,])])
+        
         if rand.uniform(0.0, 1.0) < self.rar:
             action = rand.randint(0, self.num_actions - 1)
         else:
             action = np.argmax(self.Q[s_prime])
-        # if self.verbose:
-        #     print(f"s = {s_prime}, a = {action}, r={r}")
-        self.rar *= self.radr
+        
+        self.rar *= self.radr # moving this line after dyna breaks everything on m1 mac
+        if self.dyna:
+            self.T_counter[self.s,self.a,s_prime]=self.T_counter[self.s,self.a,s_prime]+1
+            self.T=self.T_counter/self.T_counter.sum(axis=2,keepdims=True)
+            self.R[self.s, self.a]=(1 - self.alpha) * self.R[self.s, self.a] + (self.alpha * r)
+            for i in range(0, self.dyna):
+                #pick random a and s
+                sFake = np.random.randint(0,self.num_states)
+
+                aFake = np.random.randint(0,self.num_actions)
+                #get s_prime
+                s_prime_fake = np.random.multinomial(1,self.T[sFake,aFake]).argmax()
+                self.Q[sFake,aFake]=(1-self.alpha)*self.Q[sFake,aFake]+self.alpha*(self.R[sFake,aFake]+self.gamma*np.max(self.Q[s_prime_fake,]))
+
+        if self.verbose:
+            print(f"s = {s_prime}, a = {action}, r={r}")
         self.s = s_prime
         self.a = action
         return action
     
-    def update_Q(self, s, a, s_prime, r):
-            self.Q[s,a] = (1-self.alpha)*self.Q[s,a]+self.alpha*(r+self.gamma*self.Q[s_prime, np.argmax(self.Q[s_prime,])])
     def author(self):
         return 'gdutka3'
 
