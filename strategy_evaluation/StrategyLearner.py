@@ -21,23 +21,21 @@ students of CS 7646 is prohibited and subject to being investigated as a
 GT honor code violation.  		  	   		  		 		  		  		    	 		 		   		 		  
   		  	   		  		 		  		  		    	 		 		   		 		  
 -----do not edit anything above this line---  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-Student Name: Tucker Balch (replace with your name)  		  	   		  		 		  		  		    	 		 		   		 		  
-GT User ID: tb34 (replace with your User ID)  		  	   		  		 		  		  		    	 		 		   		 		  
-GT ID: 900897987 (replace with your GT ID)  		  	   		  		 		  		  		    	 		 		   		 		  
-"""  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-import datetime as dt  		  	   		  		 		  		  		    	 		 		   		 		  
-import random  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-import pandas as pd  		  	   		  		 		  		  		    	 		 		   		 		  
-import util as ut  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-class StrategyLearner(object):  		  	   		  		 		  		  		    	 		 		   		 		  
-    """  		  	   		  		 		  		  		    	 		 		   		 		  
-    A strategy learner that can learn a trading policy using the same indicators used in ManualStrategy.  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
+Student Name: Gianfranco Dutka
+GT User ID: gdutka3
+GT ID: 903890585
+"""
+
+import datetime as dt
+import random
+
+import pandas as pd
+import util as ut
+
+class StrategyLearner(object):
+    """
+    A strategy learner that can learn a trading policy using the same indicators used in ManualStrategy.
+
     :param verbose: If “verbose” is True, your code can print out information for debugging.  		  	   		  		 		  		  		    	 		 		   		 		  
         If verbose = False your code should not generate ANY output.  		  	   		  		 		  		  		    	 		 		   		 		  
     :type verbose: bool  		  	   		  		 		  		  		    	 		 		   		 		  
