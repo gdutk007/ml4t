@@ -10,6 +10,7 @@ import math
 import pandas as pd
 from util import get_data, plot_data
 import matplotlib.pyplot as plt
+import pdb
 
 def author(): 
   return 'gdutka3'
@@ -54,11 +55,11 @@ def getSma(prices, window):
    return sma, ratio
 
 def getBollingerBand(prices):
-   sma = prices.rolling(20).mean()
+   sma = prices.rolling(15).mean()
    std = prices.rolling(window=20).std()
-   upper_band = sma + (2 * std)
-   lower_band = sma - (2 * std)
-   sma = sma/sma.iloc[19]
+   upper_band = sma + (1.5 * std)
+   lower_band = sma - (1.5 * std)
+   sma = sma/sma.iloc[14]
    return upper_band, lower_band, sma
 
 
@@ -75,7 +76,7 @@ def getIndicators(prices, start_date, end_date):
    # 1. get sma and sma/ratio
    sma,_ = getSma(prices, 20)
    df_indicators['sma'] = sma
-   # df_indicators['price/sma'] = smaRatio
+   #df_indicators['price/sma'] = smaRatio
    # plt.clf()
    df_indicators['price'].plot(grid=True, linewidth= 1)
    df_indicators['sma'].plot(grid=True, linewidth= 0.8)
@@ -91,19 +92,19 @@ def getIndicators(prices, start_date, end_date):
    df_indicators['sma'] = sma
    df_indicators['upper band'] = upper_bb
    df_indicators['lower band'] = lower_bb
-   # df_indicators['price'].plot(grid=True,label="price").plot(linewidth=1.3)
-   # df_indicators['upper band'].plot(grid=True,label="upper bb", linestyle='--', linewidth=1)
-   # df_indicators['lower band'].plot(grid=True,label="lower bb", linestyle='--', linewidth=1)
-   # df_indicators['sma'].plot(grid=True,label="sma", linewidth=1.2)
-   # plt.xlabel('dates')
-   # plt.ylabel('Normalized return')
-   # plt.title('20 day bollinger band')
-   # plt.legend(["price","upper bb","lower bb", "sma"])
-   # plt.savefig('./images/bollingerBands.png')
-   # plt.clf()
+   df_indicators['price'].plot(grid=True,label="price").plot(linewidth=1.3)
+   df_indicators['upper band'].plot(grid=True,label="upper bb", linestyle='--', linewidth=1)
+   df_indicators['lower band'].plot(grid=True,label="lower bb", linestyle='--', linewidth=1)
+   df_indicators['sma'].plot(grid=True,label="sma", linewidth=1.2)
+   plt.xlabel('dates')
+   plt.ylabel('Normalized return')
+   plt.title('15 day bollinger band')
+   plt.legend(["price","upper bb","lower bb", "sma"])
+   plt.savefig('./images/bollingerBands.png')
+   plt.clf()
    
    # 3. momentum
-   #fig, axes_1 = plt.subplots(nrows=2)
+   fig, axes_1 = plt.subplots(nrows=2)
    momentum = getMomentum(normed_prices)
    df_indicators['momentum'] = momentum
    # ax_1 = df_indicators['price'].plot(grid=True,ax=axes_1[0], label='price', linewidth=1, color='orange' )
@@ -122,8 +123,9 @@ def getIndicators(prices, start_date, end_date):
 
    # 4. cci
    #import pdb;pdb.set_trace()
-   # fig, axes_2 = plt.subplots(nrows=2)
+   fig, axes_2 = plt.subplots(nrows=2)
    cci = getCCI(prices.index)#(prices - prices.rolling(window=20).mean() )/(2.5-prices.std())
+   df_indicators['cci'] = cci['CCI']
    # chart1 = df_indicators['price'].plot(ax=axes_2[0],grid=True,label='price', linewidth=1, color='blue' )
    # chart2 = cci['CCI'].plot(ax=axes_2[1],grid=True,label='cci', linewidth=1, color='red')
    # chart1.set_xticks([])

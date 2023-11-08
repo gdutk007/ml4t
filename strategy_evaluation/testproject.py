@@ -7,7 +7,7 @@ import numpy as np
 import math
 import pandas as pd
 from util import get_data, plot_data
-# from marketsimcode import *
+from marketsimcode import *
 # from TheoreticallyOptimalStrategy import *
 import matplotlib.pyplot as plt
 from indicators import *
@@ -41,9 +41,8 @@ def printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals):
    print()
 
 if __name__ == "__main__":
-   start_date=dt.datetime(2008,1,1)
-   end_date=dt.datetime(2009,12,31)
-
+   #start_date=dt.datetime(2008,1,1)
+   #end_date=dt.datetime(2009,12,31)
    # get optimal trades and benchmark trades df
    # tosTrades = testPolicy("JPM",start_date,end_date, 10000)
    # benchmarkTrades = benchmark("JPM",start_date,end_date, 10000)
@@ -82,5 +81,12 @@ if __name__ == "__main__":
    # prices.drop(columns=["SPY"], inplace=True)
    # getIndicators(prices, start_date, end_date)
    ms = ManualStrategy()
-   ms.testPolicy(symbol = "JPM",sd = dt.datetime(2008, 1, 1), ed = dt.datetime(2009,12,31), sv = 100000)
-
+   start_date = dt.datetime(2008, 1, 1)
+   end_date = dt.datetime(2009,12,31)
+   manual_strategy_trades = ms.testPolicy(symbol = "JPM", sd=start_date , ed=end_date , sv = 100000)
+   portVals = compute_portvals(manual_strategy_trades, start_val=100000)
+   # get data and print it for optimal trades and benchmark trades
+   cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = calculate_stats(portVals.to_numpy())
+   printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals)
+   print()
+   pdb.set_trace()
