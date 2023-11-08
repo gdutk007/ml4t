@@ -55,12 +55,13 @@ def getSma(prices, window):
    return sma, ratio
 
 def getBollingerBand(prices):
-   sma = prices.rolling(15).mean()
-   std = prices.rolling(window=20).std()
+   sma = prices.rolling(10).mean()
+   std = prices.rolling(window=10).std()
    upper_band = sma + (1.5 * std)
    lower_band = sma - (1.5 * std)
-   sma = sma/sma.iloc[14]
-   return upper_band, lower_band, sma
+   sma = sma/sma.iloc[9]
+   bbi = (prices-lower_band)/(upper_band-lower_band)
+   return upper_band, lower_band, sma, bbi
 
 
 # get indicators will return Bollinger bands, price/SMA crossover, RSI
@@ -74,9 +75,9 @@ def getIndicators(prices, start_date, end_date):
    df_indicators['price'] = normed_prices
    
    # 1. get sma and sma/ratio
-   sma,_ = getSma(prices, 20)
+   sma,smaRatio = getSma(prices, 20)
    df_indicators['sma'] = sma
-   #df_indicators['price/sma'] = smaRatio
+   df_indicators['price_sma_ratio'] = smaRatio
    # plt.clf()
    df_indicators['price'].plot(grid=True, linewidth= 1)
    df_indicators['sma'].plot(grid=True, linewidth= 0.8)
@@ -88,10 +89,12 @@ def getIndicators(prices, start_date, end_date):
    # plt.clf()
    
    # 2. bollinger bands
-   upper_bb, lower_bb, sma = getBollingerBand(normed_prices)
+   upper_bb, lower_bb, sma, bbp = getBollingerBand(normed_prices)
    df_indicators['sma'] = sma
    df_indicators['upper band'] = upper_bb
    df_indicators['lower band'] = lower_bb
+   # much easier to discretize bbp than just bb
+   df_indicators['bbp'] = bbp
    df_indicators['price'].plot(grid=True,label="price").plot(linewidth=1.3)
    df_indicators['upper band'].plot(grid=True,label="upper bb", linestyle='--', linewidth=1)
    df_indicators['lower band'].plot(grid=True,label="lower bb", linestyle='--', linewidth=1)
@@ -152,6 +155,7 @@ def getIndicators(prices, start_date, end_date):
    df_indicators['26 day ema'] = exp2
    df_indicators['macd'] = macd
    df_indicators['macd_signal'] = signal
+   #df_indicators['macd_div_signal'] = df_indicators['macd']/df_indicators['macd_signal']
    # df_indicators['price'].plot(grid=True,ax=axes[0],label='price', linewidth=1 )
    # df_indicators['26 day ema'].plot(grid=True,ax=axes[0],label='26 day ema', linewidth=1)
    # ax = df_indicators['12 day ema'].plot(grid=True,ax=axes[0],label='12 day ema', linewidth=1)
