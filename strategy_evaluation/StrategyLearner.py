@@ -33,6 +33,10 @@ import pandas as pd
 import util as ut
 import RTLearner as rt
 import BagLearner as ln
+from indicators import getIndicators
+import numpy as np
+import pdb;
+
 
 class StrategyLearner(object):
     """
@@ -75,29 +79,56 @@ class StrategyLearner(object):
         :param ed: A datetime object that represents the end date, defaults to 1/1/2009
         :type ed: datetime
         :param sv: The starting value of the portfolio  		  	   		  		 		  		  		    	 		 		   		 		  
-        :type sv: int  		  	   		  		 		  		  		    	 		 		   		 		  
-        """  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
+        :type sv: int
+        """
+
         # add your code to do learning here  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
+
         # example usage of the old backward compatible util function  		  	   		  		 		  		  		    	 		 		   		 		  
-        syms = [symbol]  		  	   		  		 		  		  		    	 		 		   		 		  
-        dates = pd.date_range(sd, ed)  		  	   		  		 		  		  		    	 		 		   		 		  
-        prices_all = ut.get_data(syms, dates)  # automatically adds SPY  		  	   		  		 		  		  		    	 		 		   		 		  
-        prices = prices_all[syms]  # only portfolio symbols  		  	   		  		 		  		  		    	 		 		   		 		  
-        prices_SPY = prices_all["SPY"]  # only SPY, for comparison later  		  	   		  		 		  		  		    	 		 		   		 		  
-        if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
-            print(prices)  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
+        # syms = [symbol]  		  	   		  		 		  		  		    	 		 		   		 		  
+        # dates = pd.date_range(sd, ed)  		  	   		  		 		  		  		    	 		 		   		 		  
+        # prices_all = ut.get_data(syms, dates)  # automatically adds SPY  		  	   		  		 		  		  		    	 		 		   		 		  
+        # prices = prices_all[syms]  # only portfolio symbols  		  	   		  		 		  		  		    	 		 		   		 		  
+        dates = pd.date_range(sd, ed)
+        prices_all = ut.get_data([symbol], dates)
+        # forward fill and backfill data
+        prices_all.fillna(method='ffill', inplace=True)
+        prices_all.fillna(method='bfill', inplace=True)
+        # only keep data for symbols in our portfolio
+        prices_all.drop(columns=["SPY"], inplace=True)
+        prices = prices_all.copy()
+        df_indicators = getIndicators(prices, sd, ed)
+        df_indicators['macd_diff'] = df_indicators['macd'] - df_indicators['macd_signal']
+        df_indicators['macd_diff_shift'] = df_indicators['macd_diff'].shift(1) # get crossover
+        df_signals = pd.DataFrame(index=df_indicators.index)
+        df_signals['bbp'] = [1 if x <= -0.03 else -1 if x >= 1.03 else 0 for x in df_indicators['bbp']]
+        df_signals['sma_ratio'] = [1 if x <= 0.955 else -1 if x >= 1.055 else 0 for x in df_indicators['price_sma_ratio']]
+        df_signals['macd'] = 0
+
+        for index,row in df_indicators.iterrows():
+            if row['macd_diff'] > 0.0 and row['macd_diff_shift'] < 0.0:
+                df_signals.at[index,'macd'] = 1
+            elif row['macd_diff'] < 0.0 and row['macd_diff_shift'] > 0.0:
+                df_signals.at[index,'macd'] = -1
+
+        df_signals['return'] = (prices_all.shift(-10)/prices_all)-1.0
+        ybuy = 0.12
+        ysell = -0.07
+        df_signals['target'] = [1 if x > ybuy else -1 if x < ysell else 0 for x in df_signals['return']]
+        pdb.set_trace()
+        #prices_SPY = prices_all["SPY"]  # only SPY, for comparison later  		  	   		  		 		  		  		    	 		 		   		 		  
+        #if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
+        #    print(prices)  		  	   		  		 		  		  		    	 		 		   		 		  
+
         # example use with new colname  		  	   		  		 		  		  		    	 		 		   		 		  
-        volume_all = ut.get_data(  		  	   		  		 		  		  		    	 		 		   		 		  
-            syms, dates, colname="Volume"  		  	   		  		 		  		  		    	 		 		   		 		  
-        )  # automatically adds SPY  		  	   		  		 		  		  		    	 		 		   		 		  
-        volume = volume_all[syms]  # only portfolio symbols  		  	   		  		 		  		  		    	 		 		   		 		  
-        volume_SPY = volume_all["SPY"]  # only SPY, for comparison later  		  	   		  		 		  		  		    	 		 		   		 		  
-        if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
-            print(volume)  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
+        # volume_all = ut.get_data(syms, dates, colname="Volume") # automatically adds SPY
+        
+        # volume = volume_all[syms]  # only portfolio symbols  		  	   		  		 		  		  		    	 		 		   		 		  
+        # volume_SPY = volume_all["SPY"]  # only SPY, for comparison later  		  	   		  		 		  		  		    	 		 		   		 		  
+        
+        # if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
+        #     print(volume)  		  	   		  		 		  		  		    	 		 		   		 		  
+
     # this method should use the existing policy and test it against new data  		  	   		  		 		  		  		    	 		 		   		 		  
     def testPolicy(  		  	   		  		 		  		  		    	 		 		   		 		  
         self,  		  	   		  		 		  		  		    	 		 		   		 		  
