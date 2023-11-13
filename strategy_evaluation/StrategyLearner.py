@@ -31,45 +31,49 @@ import random
 
 import pandas as pd
 import util as ut
+import RTLearner as rt
+import BagLearner as ln
 
 class StrategyLearner(object):
     """
     A strategy learner that can learn a trading policy using the same indicators used in ManualStrategy.
 
-    :param verbose: If “verbose” is True, your code can print out information for debugging.  		  	   		  		 		  		  		    	 		 		   		 		  
-        If verbose = False your code should not generate ANY output.  		  	   		  		 		  		  		    	 		 		   		 		  
-    :type verbose: bool  		  	   		  		 		  		  		    	 		 		   		 		  
-    :param impact: The market impact of each transaction, defaults to 0.0  		  	   		  		 		  		  		    	 		 		   		 		  
-    :type impact: float  		  	   		  		 		  		  		    	 		 		   		 		  
-    :param commission: The commission amount charged, defaults to 0.0  		  	   		  		 		  		  		    	 		 		   		 		  
-    :type commission: float  		  	   		  		 		  		  		    	 		 		   		 		  
-    """  		  	   		  		 		  		  		    	 		 		   		 		  
-    # constructor  		  	   		  		 		  		  		    	 		 		   		 		  
-    def __init__(self, verbose=False, impact=0.0, commission=0.0):  		  	   		  		 		  		  		    	 		 		   		 		  
-        """  		  	   		  		 		  		  		    	 		 		   		 		  
-        Constructor method  		  	   		  		 		  		  		    	 		 		   		 		  
-        """  		  	   		  		 		  		  		    	 		 		   		 		  
-        self.verbose = verbose  		  	   		  		 		  		  		    	 		 		   		 		  
-        self.impact = impact  		  	   		  		 		  		  		    	 		 		   		 		  
-        self.commission = commission  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-    # this method should create a QLearner, and train it for trading  		  	   		  		 		  		  		    	 		 		   		 		  
-    def add_evidence(  		  	   		  		 		  		  		    	 		 		   		 		  
-        self,  		  	   		  		 		  		  		    	 		 		   		 		  
-        symbol="IBM",  		  	   		  		 		  		  		    	 		 		   		 		  
-        sd=dt.datetime(2008, 1, 1),  		  	   		  		 		  		  		    	 		 		   		 		  
-        ed=dt.datetime(2009, 1, 1),  		  	   		  		 		  		  		    	 		 		   		 		  
-        sv=10000,  		  	   		  		 		  		  		    	 		 		   		 		  
-    ):  		  	   		  		 		  		  		    	 		 		   		 		  
-        """  		  	   		  		 		  		  		    	 		 		   		 		  
-        Trains your strategy learner over a given time frame.  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-        :param symbol: The stock symbol to train on  		  	   		  		 		  		  		    	 		 		   		 		  
-        :type symbol: str  		  	   		  		 		  		  		    	 		 		   		 		  
-        :param sd: A datetime object that represents the start date, defaults to 1/1/2008  		  	   		  		 		  		  		    	 		 		   		 		  
-        :type sd: datetime  		  	   		  		 		  		  		    	 		 		   		 		  
-        :param ed: A datetime object that represents the end date, defaults to 1/1/2009  		  	   		  		 		  		  		    	 		 		   		 		  
-        :type ed: datetime  		  	   		  		 		  		  		    	 		 		   		 		  
+    :param verbose: If “verbose” is True, your code can print out information for debugging.
+        If verbose = False your code should not generate ANY output.
+    :type verbose: bool
+    :param impact: The market impact of each transaction, defaults to 0.0
+    :type impact: float
+    :param commission: The commission amount charged, defaults to 0.0
+    :type commission: float
+    """
+    # constructor
+    def __init__(self, verbose=False, impact=0.0, commission=0.0):
+        """
+        Constructor method
+        """
+        self.verbose = verbose
+        self.impact = impact
+        self.commission = commission
+        self.learner =  ln.BagLearner(learner=rt.RTLearner, 
+                                kwargs={"leaf_size":5}, bags=10, boost=False, verbose=False)
+
+    # this method should create a QLearner, and train it for trading
+    def add_evidence(
+        self,
+        symbol="IBM",
+        sd=dt.datetime(2008, 1, 1),
+        ed=dt.datetime(2009, 1, 1),
+        sv=10000,
+    ):
+        """
+        Trains your strategy learner over a given time frame.
+
+        :param symbol: The stock symbol to train on
+        :type symbol: str
+        :param sd: A datetime object that represents the start date, defaults to 1/1/2008
+        :type sd: datetime
+        :param ed: A datetime object that represents the end date, defaults to 1/1/2009
+        :type ed: datetime
         :param sv: The starting value of the portfolio  		  	   		  		 		  		  		    	 		 		   		 		  
         :type sv: int  		  	   		  		 		  		  		    	 		 		   		 		  
         """  		  	   		  		 		  		  		    	 		 		   		 		  
@@ -140,7 +144,7 @@ class StrategyLearner(object):
         if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
             print(prices_all)  		  	   		  		 		  		  		    	 		 		   		 		  
         return trades  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-if __name__ == "__main__":  		  	   		  		 		  		  		    	 		 		   		 		  
-    print("One does not simply think up a strategy")  		  	   		  		 		  		  		    	 		 		   		 		  
+
+
+if __name__ == "__main__":
+    print("One does not simply think up a strategy")

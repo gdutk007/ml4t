@@ -62,9 +62,11 @@ def compute_portvals_test(
     rv = pd.DataFrame(index=portvals.index, data=portvals.values)  		  	   		  		 		  		  		    	 		 		   		 		  
     return rv  		  	   		  		 		  		  		    	 		 		   		 		  
     
-def compute_portvals(  		  	   		  		 		  		  		    	 		 		   		 		  
+def compute_portvals(
     df,
-    start_val=1000000
+    start_val=1000000,
+    commission=9.95,
+    impact=0.005,
 ):
     ############### create prices data frame ##################
     # Read in adjusted closing prices for given symbols, date range  		  	   		  		 		  		  		    	 		 		   		 		  
@@ -81,14 +83,14 @@ def compute_portvals(
     ################ create trades dataframe #################
     trades_df = pd.DataFrame(0.0, index=prices_all.index, columns=prices_all.columns)
     for index, row in df.iterrows():
-        share_price = prices_all.loc[index][0]   #loc[ row.loc[ 'Date' ] ][ row.loc[ 'Symbol' ] ]
-        share_amount = df.loc[index][0]          #row.loc['Shares']
+        share_price = prices_all.loc[index][0] + prices_all.loc[index][0]*impact
+        share_amount = df.loc[index][0]
         if share_amount < 0:
             trades_df.loc[index][0] = share_amount
-            trades_df.loc[index][1] = share_price*share_amount*(-1)
+            trades_df.loc[index][1] = share_price*share_amount*(-1) - commission
         else:
             trades_df.loc[index][0] = share_amount
-            trades_df.loc[index][1] = share_price*share_amount*(-1)
+            trades_df.loc[index][1] = share_price*share_amount*(-1) - commission
     ################# End of the trades dataframe ############
 
     ################  create holdings dataframe ############## 
