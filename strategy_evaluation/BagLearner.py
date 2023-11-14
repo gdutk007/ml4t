@@ -25,7 +25,8 @@ GT honor code violation.
   		  	   		  		 		  		  		    	 		 		   		 		  
 import numpy as np  		  	   		  		 		  		  		    	 		 		   		 		  
 import math  		  	   		  		 		  		  		    	 		 		   		 		  
-import sys  		  	   		  		 		  		  		    	 		 		   		 		  
+import sys  
+from scipy import stats
 	  		 		  		  		    	 		 		   		 		  
   		  	   		  		 		  		  		    	 		 		   		 		  
 class BagLearner(object):  		  	   		  		 		  		  		    	 		 		   		 		  
@@ -49,7 +50,20 @@ class BagLearner(object):
         out = []	   	  			  	 		  		  		    	 		 		   		 		  
         for learner in self.learners:
             out.append(learner.query(points))
-        return np.mean(out,axis=0)
+        
+        temp = np.transpose(out)
+        # ans = []
+        # for row in temp:
+        #     sum = np.sum(row)
+        #     if sum > 0 :
+        #         ans.append(1)
+        #     elif sum < 0:
+        #         ans.append(-1)
+        #     else:
+        #         ans.append(0)
+        moderes = stats.mode(temp,axis=1).mode
+        moderes = moderes.reshape(moderes.shape[0],)
+        return np.array(moderes)
       		  	   		  		 		  		  		    	 		 		   		 		   		  	   		  		 		  		  		    	 		 		   		 		  
 if __name__ == "__main__":  		  	   		  		 		  		  		    	 		 		   		 		  
     print("the secret clue is 'zzyzx'")  		  	   		  		 		  		  		    	 		 		   		 		  

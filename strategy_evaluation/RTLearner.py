@@ -101,21 +101,24 @@ class RTLearner(object):
         for i in range(len(points)):
             predVals[i] = self.traverse_tree(0,points[i])
         return predVals
-    
-    def get_feature(self, data, y ):
-        coef = np.zeros(data.shape[1])
-        for i in range(data.shape[1]):
-            matrix = np.corrcoef(data[:,i],y.flatten())
-            coef[i] = matrix[1][0]
-        return coef
+
+    def get_mode(self, data):
+        count = {}
+        for i in data:
+            if i in count:
+                count[i]+= 1
+            else:
+                count[i] = 1
+        return max(count, key=count.get)
 
     def build_tree(self, data):
         if data.shape[0] <= self.leaf_size:
             if data.shape[0] == 0:
                 return np.array([-1, 0, -1,-1])
             if data.shape[0] > 1:
-                mean = np.mean(data[:,-1])
-                return np.array([-1, mean, -1,-1])
+                #mean = np.mean(data[:,-1])
+                mode = self.get_mode(data[:,-1])
+                return np.array([-1, mode, -1,-1])
             return np.array([-1, data[0][-1], -1,-1])
         elif (data[:,-1] == data[0][-1]).all():
             # values are all the same so we return y element
@@ -124,9 +127,10 @@ class RTLearner(object):
             # determine best feature
             features = data[:,0:-1]
             y = data[:,-1]
-            idx = np.random.choice(data.shape[1] - 2 )
+            idx = np.random.choice(data.shape[1] - 1 )
             # now get split val
-            splitVal = np.median(data[:,idx])
+            splitVal = np.nanmedian(data[:,idx])
+            #import pdb; pdb.set_trace()
             splitData = data[data[:,idx] <= splitVal]
             if np.array_equal(splitData , data):
                 half_rows = int(0.5 * data.shape[0])

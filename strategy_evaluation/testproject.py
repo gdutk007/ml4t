@@ -68,9 +68,14 @@ def test_strategy_learner():
    commission = 9.95
    impact = 0.0005
    learner = ln.StrategyLearner(verbose = False, impact = 0.0, commission=0.0) # constructor 
-   learner.add_evidence(symbol = "AAPL", sd=dt.datetime(2008,1,1), ed=dt.datetime(2009,12,31), sv = 100000) # training phase 
-   df_trades = learner.testPolicy(symbol = "AAPL", sd=dt.datetime(2010,1,1), ed=dt.datetime(2011,12,31), sv = 100000) # testing phase
-
+   learner.add_evidence(symbol = "JPM", sd=dt.datetime(2008,1,1), ed=dt.datetime(2009,12,31), sv = 100000) # training phase 
+   trades = learner.testPolicy(symbol = "JPM", sd=start_date, ed=end_date, sv = 100000) # testing phase
+   portVals = compute_portvals(trades, start_val=100000, commission=commission,impact=impact)
+   cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = calculate_stats(portVals.to_numpy())
+   print('******** in-sample strategy learner  ************')
+   printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals)
+   print('***********************************************\n')
+   #pdb.set_trace()
 
 if __name__ == "__main__":
    ms = ManualStrategy()

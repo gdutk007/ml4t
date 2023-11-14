@@ -59,7 +59,7 @@ class StrategyLearner(object):
         self.impact = impact
         self.commission = commission
         self.learner =  ln.BagLearner(learner=rt.RTLearner, 
-                                kwargs={"leaf_size":5}, bags=10, boost=False, verbose=False)
+                                kwargs={"leaf_size":5}, bags=5, boost=False, verbose=False)
 
     # this method should create a QLearner, and train it for trading
     def add_evidence(
@@ -101,33 +101,28 @@ class StrategyLearner(object):
         df_indicators['macd_diff'] = df_indicators['macd'] - df_indicators['macd_signal']
         df_indicators['macd_diff_shift'] = df_indicators['macd_diff'].shift(1) # get crossover
         df_signals = pd.DataFrame(index=df_indicators.index)
-        df_signals['bbp'] = [1 if x <= -0.03 else -1 if x >= 1.03 else 0 for x in df_indicators['bbp']]
-        df_signals['sma_ratio'] = [1 if x <= 0.955 else -1 if x >= 1.055 else 0 for x in df_indicators['price_sma_ratio']]
+        #df_signals['bbp'] = [1 if x <= -0.03 else -1 if x >= 1.03 else 0 for x in df_indicators['bbp']]
+        #df_signals['sma_ratio'] = [1 if x <= 0.955 else -1 if x >= 1.055 else 0 for x in df_indicators['price_sma_ratio']]
+        df_signals['bbp'] = df_indicators['bbp']
+        df_signals['sma_ratio'] = df_indicators['price_sma_ratio']
         df_signals['macd'] = 0
-
         for index,row in df_indicators.iterrows():
             if row['macd_diff'] > 0.0 and row['macd_diff_shift'] < 0.0:
                 df_signals.at[index,'macd'] = 1
             elif row['macd_diff'] < 0.0 and row['macd_diff_shift'] > 0.0:
                 df_signals.at[index,'macd'] = -1
 
-        df_signals['return'] = (prices_all.shift(-10)/prices_all)-1.0
-        ybuy = 0.12
+        #pdb.set_trace()
+        df_signals['return'] = (prices_all.shift(-15)/prices_all)-1.0
+        ybuy = 0.07
         ysell = -0.07
         df_signals['target'] = [1 if x > ybuy else -1 if x < ysell else 0 for x in df_signals['return']]
-        pdb.set_trace()
-        #prices_SPY = prices_all["SPY"]  # only SPY, for comparison later  		  	   		  		 		  		  		    	 		 		   		 		  
-        #if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
-        #    print(prices)  		  	   		  		 		  		  		    	 		 		   		 		  
-
-        # example use with new colname  		  	   		  		 		  		  		    	 		 		   		 		  
-        # volume_all = ut.get_data(syms, dates, colname="Volume") # automatically adds SPY
-        
-        # volume = volume_all[syms]  # only portfolio symbols  		  	   		  		 		  		  		    	 		 		   		 		  
-        # volume_SPY = volume_all["SPY"]  # only SPY, for comparison later  		  	   		  		 		  		  		    	 		 		   		 		  
-        
-        # if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
-        #     print(volume)  		  	   		  		 		  		  		    	 		 		   		 		  
+        train_x = df_indicators[['bbp','price_sma_ratio','macd_diff']]
+        train_y = df_signals['target'] 
+        #pdb.set_trace()
+        self.learner.add_evidence(train_x.to_numpy(),train_y.to_numpy())
+        # pdb.set_trace()
+        # print('things did not crash!')
 
     # this method should use the existing policy and test it against new data  		  	   		  		 		  		  		    	 		 		   		 		  
     def testPolicy(  		  	   		  		 		  		  		    	 		 		   		 		  
@@ -154,26 +149,50 @@ class StrategyLearner(object):
             long so long as net holdings are constrained to -1000, 0, and 1000.  		  	   		  		 		  		  		    	 		 		   		 		  
         :rtype: pandas.DataFrame  		  	   		  		 		  		  		    	 		 		   		 		  
         """  		  	   		  		 		  		  		    	 		 		   		 		  
-  		  	   		  		 		  		  		    	 		 		   		 		  
-        # here we build a fake set of trades  		  	   		  		 		  		  		    	 		 		   		 		  
-        # your code should return the same sort of data  		  	   		  		 		  		  		    	 		 		   		 		  
-        dates = pd.date_range(sd, ed)  		  	   		  		 		  		  		    	 		 		   		 		  
-        prices_all = ut.get_data([symbol], dates)  # automatically adds SPY  		  	   		  		 		  		  		    	 		 		   		 		  
+        # getting pricess, then backfill and front fill
+        dates = pd.date_range(sd, ed)
+        prices_all = ut.get_data([symbol], dates)
+        prices_all.fillna(method='ffill', inplace=True)
+        prices_all.fillna(method='bfill', inplace=True)
+
+        # creating the trades dataframe and setting everything to 0
         trades = prices_all[[symbol,]]  # only portfolio symbols  		  	   		  		 		  		  		    	 		 		   		 		  
-        trades_SPY = prices_all["SPY"]  # only SPY, for comparison later  		  	   		  		 		  		  		    	 		 		   		 		  
-        trades.values[:, :] = 0  # set them all to nothing  		  	   		  		 		  		  		    	 		 		   		 		  
-        trades.values[0, :] = 1000  # add a BUY at the start  		  	   		  		 		  		  		    	 		 		   		 		  
-        trades.values[40, :] = -1000  # add a SELL  		  	   		  		 		  		  		    	 		 		   		 		  
-        trades.values[41, :] = 1000  # add a BUY  		  	   		  		 		  		  		    	 		 		   		 		  
-        trades.values[60, :] = -2000  # go short from long  		  	   		  		 		  		  		    	 		 		   		 		  
-        trades.values[61, :] = 2000  # go long from short  		  	   		  		 		  		  		    	 		 		   		 		  
-        trades.values[-1, :] = -1000  # exit on the last day  		  	   		  		 		  		  		    	 		 		   		 		  
-        if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
-            print(type(trades))  # it better be a DataFrame!  		  	   		  		 		  		  		    	 		 		   		 		  
-        if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
-            print(trades)  		  	   		  		 		  		  		    	 		 		   		 		  
-        if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
-            print(prices_all)  		  	   		  		 		  		  		    	 		 		   		 		  
+        prices_all.drop(columns=["SPY"], inplace=True)
+        trades.values[:, :] = 0
+
+        # getting indicators dataframe, then we're going to query
+        df_indicators = getIndicators(prices_all.copy(), sd, ed)
+        df_indicators['macd_diff'] = df_indicators['macd'] - df_indicators['macd_signal']
+        #pdb.set_trace()
+        pred_y = self.learner.query(df_indicators[['bbp','price_sma_ratio','macd_diff']].to_numpy())
+        # pdb.set_trace()
+        
+        holding = 0
+        j = 0
+        for i in trades.index:
+            if holding == 0:
+                if pred_y[j] > 0 :
+                    trades.ix[i,0] = 1000
+                    holding = 1000
+                elif pred_y[j] < 0:
+                    trades.ix[i,0] = -1000
+                    holding = -1000
+            elif holding == 1000:
+                if pred_y[j] < 0:
+                    trades.ix[i,0] = -2000
+                    holding = -1000
+            elif holding == -1000:
+                if pred_y[j] > 0:
+                    trades.ix[i,0] = 2000
+                    holding = 1000
+            j += 1
+        # if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
+        #     print(type(trades))  # it better be a DataFrame!  		  	   		  		 		  		  		    	 		 		   		 		  
+        # if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
+        #     print(trades)  		  	   		  		 		  		  		    	 		 		   		 		  
+        # if self.verbose:  		  	   		  		 		  		  		    	 		 		   		 		  
+        #     print(prices_all)  		  	   		  		 		  		  		    	 		 		   		 		  
+        # pdb.set_trace()
         return trades  		  	   		  		 		  		  		    	 		 		   		 		  
 
 
