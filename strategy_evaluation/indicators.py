@@ -9,8 +9,8 @@ import numpy as np
 import math
 import pandas as pd
 from util import get_data, plot_data
-import matplotlib.pyplot as plt
-import pdb
+# import matplotlib.pyplot as plt
+# import pdb
 
 def author(): 
   return 'gdutka3'
@@ -35,7 +35,7 @@ def getCCI(dates):
 def getMomentum(prices):
    momentum = pd.DataFrame(index=prices.index)
    momentum['momentum'] = 0.0
-   momentum.iloc[0:14][0] = None
+   momentum.iloc[0:14,0] = None
    for i in range(14,len(prices)):
       momentum.iloc[i][0] = prices.iloc[i][0]/prices.iloc[i-14][0] - 1
    return momentum
@@ -79,8 +79,8 @@ def getIndicators(prices, start_date, end_date):
    df_indicators['sma'] = sma
    df_indicators['price_sma_ratio'] = smaRatio
    # plt.clf()
-   df_indicators['price'].plot(grid=True, linewidth= 1)
-   df_indicators['sma'].plot(grid=True, linewidth= 0.8)
+   #df_indicators['price'].plot(grid=True, linewidth= 1)
+   #df_indicators['sma'].plot(grid=True, linewidth= 0.8)
    # plt.xlabel('dates')
    # plt.ylabel('Normalized return')
    # plt.title('price/sma cross')
@@ -95,21 +95,21 @@ def getIndicators(prices, start_date, end_date):
    df_indicators['lower band'] = lower_bb
    # much easier to discretize bbp than just bb
    df_indicators['bbp'] = bbp
-   df_indicators['price'].plot(grid=True,label="price").plot(linewidth=1.3)
-   df_indicators['upper band'].plot(grid=True,label="upper bb", linestyle='--', linewidth=1)
-   df_indicators['lower band'].plot(grid=True,label="lower bb", linestyle='--', linewidth=1)
-   df_indicators['sma'].plot(grid=True,label="sma", linewidth=1.2)
-   plt.xlabel('dates')
-   plt.ylabel('Normalized return')
-   plt.title('15 day bollinger band')
-   plt.legend(["price","upper bb","lower bb", "sma"])
-   plt.savefig('./images/bollingerBands.png')
-   plt.clf()
+   # df_indicators['price'].plot(grid=True,label="price").plot(linewidth=1.3)
+   # df_indicators['upper band'].plot(grid=True,label="upper bb", linestyle='--', linewidth=1)
+   # df_indicators['lower band'].plot(grid=True,label="lower bb", linestyle='--', linewidth=1)
+   # df_indicators['sma'].plot(grid=True,label="sma", linewidth=1.2)
+   # # plt.xlabel('dates')
+   # plt.ylabel('Normalized return')
+   # plt.title('15 day bollinger band')
+   # plt.legend(["price","upper bb","lower bb", "sma"])
+   # plt.savefig('./images/bollingerBands.png')
+   # plt.clf()
    
    # 3. momentum
-   fig, axes_1 = plt.subplots(nrows=2)
-   momentum = getMomentum(normed_prices)
-   df_indicators['momentum'] = momentum
+   # fig, axes_1 = plt.subplots(nrows=2)
+   # momentum = getMomentum(normed_prices)
+   # df_indicators['momentum'] = momentum
    # ax_1 = df_indicators['price'].plot(grid=True,ax=axes_1[0], label='price', linewidth=1, color='orange' )
    # ax_2 = df_indicators['momentum'].plot(grid=True,ax=axes_1[1], label='momentum', linewidth=1, color='black' )
    # ax_1.legend(['price'])
@@ -126,7 +126,7 @@ def getIndicators(prices, start_date, end_date):
 
    # 4. cci
    #import pdb;pdb.set_trace()
-   fig, axes_2 = plt.subplots(nrows=2)
+   # fig, axes_2 = plt.subplots(nrows=2)
    cci = getCCI(prices.index)#(prices - prices.rolling(window=20).mean() )/(2.5-prices.std())
    df_indicators['cci'] = cci['CCI']
    # chart1 = df_indicators['price'].plot(ax=axes_2[0],grid=True,label='price', linewidth=1, color='blue' )
@@ -158,7 +158,7 @@ def getIndicators(prices, start_date, end_date):
    #df_indicators['macd_div_signal'] = df_indicators['macd']/df_indicators['macd_signal']
    # df_indicators['price'].plot(grid=True,ax=axes[0],label='price', linewidth=1 )
    # df_indicators['26 day ema'].plot(grid=True,ax=axes[0],label='26 day ema', linewidth=1)
-   # ax = df_indicators['12 day ema'].plot(grid=True,ax=axes[0],label='12 day ema', linewidth=1)
+   # ax = df_indicators['12 day ema'].`plot`(grid=True,ax=axes[0],label='12 day ema', linewidth=1)
    # ax.legend(['price','12 day ema','26 day ema'])
    # ax.set_xticks([])
    # ax.set_ylabel('Price')

@@ -59,7 +59,7 @@ class StrategyLearner(object):
         self.impact = impact
         self.commission = commission
         self.learner =  ln.BagLearner(learner=rt.RTLearner, 
-                                kwargs={"leaf_size":5}, bags=5, boost=False, verbose=False)
+                                kwargs={"leaf_size":5}, bags=10, boost=False, verbose=False)
 
     # this method should create a QLearner, and train it for trading
     def add_evidence(
@@ -114,8 +114,8 @@ class StrategyLearner(object):
 
         #pdb.set_trace()
         df_signals['return'] = (prices_all.shift(-15)/prices_all)-1.0
-        ybuy = 0.07
-        ysell = -0.07
+        ybuy = 0.07 + 0.7*self.impact
+        ysell = -0.07 + 0.7*self.impact
         df_signals['target'] = [1 if x > ybuy else -1 if x < ysell else 0 for x in df_signals['return']]
         train_x = df_indicators[['bbp','price_sma_ratio','macd_diff']]
         train_y = df_signals['target'] 

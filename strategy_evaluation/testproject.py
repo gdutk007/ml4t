@@ -75,7 +75,17 @@ def test_strategy_learner():
    print('******** in-sample strategy learner  ************')
    printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals)
    print('***********************************************\n')
-   #pdb.set_trace()
+   # out of sample JPM
+   #  January 1, 2010 to December 31, 2011
+   start_date = dt.datetime(2010, 1, 1)
+   end_date = dt.datetime(2011,12,31)
+   trades = learner.testPolicy(symbol = "JPM", sd=start_date, ed=end_date, sv = 100000) # testing phase
+   portVals = compute_portvals(trades, start_val=100000, commission=commission,impact=impact)
+   cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = calculate_stats(portVals.to_numpy())
+   print('******** out-of-sample strategy learner  ************')
+   printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals)
+   print('***********************************************\n')
+
 
 if __name__ == "__main__":
    ms = ManualStrategy()
@@ -121,5 +131,3 @@ if __name__ == "__main__":
    print('***********************************************\n')
 
    test_strategy_learner()
-
-   #pdb.set_trace()
