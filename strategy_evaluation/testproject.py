@@ -86,17 +86,16 @@ def test_strategy_learner():
    printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals)
    print('***********************************************\n')
 
-
-if __name__ == "__main__":
+def test_manual_strategy():
    ms = ManualStrategy()
    start_date = dt.datetime(2008, 1, 1)
    end_date = dt.datetime(2009,12,31)
    commission = 9.95
    impact = 0.0005
 
-   manual_strategy_trades = ms.testPolicy(symbol = "JPM", sd=start_date , ed=end_date , sv = 100000)
+   manual_strategy_trades_insample = ms.testPolicy(symbol = "JPM", sd=start_date , ed=end_date , sv = 100000)
    benchmark_trades = ms.benchmark(symbol = "JPM", sd=start_date , ed=end_date , sv = 100000)
-   portVals = compute_portvals(manual_strategy_trades, start_val=100000, commission=commission,impact=impact)
+   portVals = compute_portvals(manual_strategy_trades_insample, start_val=100000, commission=commission,impact=impact)
    benchmark_portvals = compute_portvals(benchmark_trades, start_val=100000, commission=commission,impact=impact)
    graph_port_vals_in_sample(benchmark_portvals, portVals)
 
@@ -114,9 +113,9 @@ if __name__ == "__main__":
    # Out of sample: January 1, 2010 to December 31, 2011
    start_date = dt.datetime(2010, 1, 1)
    end_date = dt.datetime(2011,12,31)
-   manual_strategy_trades = ms.testPolicy(symbol = "JPM", sd=start_date , ed=end_date , sv = 100000)
+   manual_strategy_trades_outsample = ms.testPolicy(symbol = "JPM", sd=start_date , ed=end_date , sv = 100000)
    benchmark_trades = ms.benchmark(symbol = "JPM", sd=start_date , ed=end_date , sv = 100000)
-   portVals = compute_portvals(manual_strategy_trades, start_val=100000, commission=commission,impact=impact)
+   portVals = compute_portvals(manual_strategy_trades_outsample, start_val=100000, commission=commission,impact=impact)
    benchmark_portvals = compute_portvals(benchmark_trades, start_val=100000, commission=commission,impact=impact)
    graph_port_vals_out_sample(benchmark_portvals, portVals)
 
@@ -130,4 +129,96 @@ if __name__ == "__main__":
    printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, benchmark_portvals)
    print('***********************************************\n')
 
-   test_strategy_learner()
+def run_manual_strategy(symbol,sd, ed, impact, comission):
+   ms = ManualStrategy()
+   manual_strategy_trades = ms.testPolicy(symbol = symbol, sd=sd , ed=ed , sv = 100000)
+   portVals = compute_portvals(manual_strategy_trades, start_val=100000, commission=comission,impact=impact)
+   cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = calculate_stats(portVals.to_numpy())
+   printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals)
+   return portVals,manual_strategy_trades
+
+def run_benchmark(symbol,sd, ed, impact, comission):
+   ms = ManualStrategy()
+   benchmark_trades = ms.benchmark(symbol = symbol, sd=sd, ed=ed , sv = 100000)
+   benchmark_portvals = compute_portvals(benchmark_trades, start_val=100000, commission=comission,impact=impact)
+   cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = calculate_stats(benchmark_portvals.to_numpy())
+   printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, benchmark_portvals)
+   return benchmark_portvals
+
+def train_learner( symbol, sd, ed, impact, commission):
+   learner = ln.StrategyLearner(verbose = False, impact = impact, commission=commission)
+   learner.add_evidence(symbol = symbol, sd=sd, ed=ed, sv = 100000)
+   return learner
+
+def run_strategy_learner(learner_obj, symbol, sd, ed, impact, commission):
+   trades = learner_obj.testPolicy(symbol=symbol, sd=sd, ed=ed, sv = 100000)
+   portVals = compute_portvals(trades, start_val=100000, commission=commission,impact=impact)
+   cum_ret, avg_daily_ret, std_daily_ret, sharpe_ratio = calculate_stats(portVals.to_numpy())
+   printData(sharpe_ratio, cum_ret, std_daily_ret, avg_daily_ret, portVals)
+   return portVals
+
+
+def experiment1():
+   commission = 9.95
+   impact = 0.0005
+   #Training / in-sample: January 1, 2008 to December 31, 2009. 
+   sd = dt.datetime(2008, 1, 1)
+   ed = dt.datetime(2009,12,31)
+   print("*** manual strategy using indicators ***")
+   ms_port_vals, manual_strategy_trades = run_manual_strategy("JPM", sd, ed, impact, commission)
+   print(" ******")
+   print("*** Benchmark ***")
+   bench_portvals = run_benchmark("JPM", sd, ed, impact, commission)
+   print(" ******")
+   learner_obj = train_learner("JPM", sd, ed, impact, commission)
+   print("*** strategy learner ***")
+   ai_portvals = run_strategy_learner(learner_obj,"JPM", sd, ed, impact, commission)
+   print(" ******")
+   ms_port_vals = ms_port_vals/ms_port_vals.iloc[0]
+   bench_portvals = bench_portvals/bench_portvals.iloc[0]
+   ai_portvals = ai_portvals/ai_portvals.iloc[0]
+   plt.clf()
+   ax = ms_port_vals.plot()
+   bench_portvals.plot(ax=ax)
+   ai_portvals.plot(ax=ax)
+   plt.xlabel('Dates')
+   plt.ylabel('Normalized return')
+   plt.title('JPM In-Sample Manual Strategy vs Benchmark vs Random Forest')
+   plt.legend(["Manual Strategy","Benchmark", "Random Forest"])
+   plt.savefig('./images/experiment1-insample.png')
+
+   # Testing / out-of-sample: January 1, 2010 to December 31 2011. 
+   sd = dt.datetime(2010, 1, 1)
+   ed = dt.datetime(2011,12,31)
+   print("*** manual strategy using indicators ***")
+   ms_port_vals,manual_strategy_trades = run_manual_strategy("JPM", sd, ed, impact, commission)
+   buy_dates = manual_strategy_trades.index[manual_strategy_trades['JPM'] > 0].tolist()
+   sell_dates = manual_strategy_trades.index[manual_strategy_trades['JPM'] < 0].tolist()
+   print(" ******")
+   print("*** Benchmark ***")
+   bench_portvals = run_benchmark("JPM", sd, ed, impact, commission)
+   print(" ******")
+   learner_obj = train_learner("JPM", sd, ed, impact, commission)
+   print("*** strategy learner ***")
+   ai_portvals = run_strategy_learner(learner_obj,"JPM", sd, ed, impact, commission)
+   print(" ******")
+   ms_port_vals = ms_port_vals/ms_port_vals.iloc[0]
+   bench_portvals = bench_portvals/bench_portvals.iloc[0]
+   ai_portvals = ai_portvals/ai_portvals.iloc[0]
+   plt.clf()
+   ax = ms_port_vals.plot()
+   bench_portvals.plot(ax=ax)
+   ai_portvals.plot(ax=ax)
+   plt.xlabel('Dates')
+   plt.ylabel('Normalized return')
+   import pdb;pdb.set_trace()
+   plt.vlines(x=sell_dates,ymin=ms_port_vals.loc[sell_dates,'JPM']-0.5,ymax=ms_port_vals.loc[sell_dates,'JPM']-0.5)
+   plt.title('JPM Out-Of-Sample Manual Strategy vs Benchmark vs Random Forest')
+   plt.legend(["Manual Strategy","Benchmark", "Random Forest"])
+   plt.savefig('./images/experiment1-outsample.png')
+
+
+if __name__ == "__main__":
+   #test_manual_strategy()
+   #test_strategy_learner()
+   experiment1()
