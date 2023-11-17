@@ -3,10 +3,15 @@ import random
 import pandas as pd
 import util as ut
 from indicators import getIndicators
+from marketsimcode import *
 import numpy as np
-import pdb;
 
 class ManualStrategy(object):
+   
+   ms_strategy_trades = []
+   ms_portvals = []
+   benchmark_trades = []
+   benchmark_portvals = []
 
    def testPolicy(self, symbol, sd,ed,sv):
       dates = pd.date_range(sd, ed)

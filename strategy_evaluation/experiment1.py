@@ -15,6 +15,7 @@ import StrategyLearner  as ln
 import pdb
 
 
+
 def author(): 
   return 'gdutka3'
 
@@ -170,6 +171,7 @@ def run_strategy_learner(learner_obj, symbol, sd, ed, impact, commission):
    return portVals
 
 
+
 def experiment1():
    commission = 9.95
    impact = 0.0005
@@ -233,18 +235,6 @@ def experiment1():
    plt.legend(["Manual Strategy","Benchmark", "Random Forest"])
    plt.savefig('./images/experiment1-outsample.png')
 
-def experiment2():
-   commission = 9.95
-   impact = 0.0005
-   #Training / in-sample: January 1, 2008 to December 31, 2009. 
-   sd = dt.datetime(2008, 1, 1)
-   ed = dt.datetime(2009,12,31)
-   strat_porvals = []
-   for i in range(10):
-      learner_obj = train_learner("JPM", sd, ed, impact*i, commission*i )
-      strat_porvals.append( run_strategy_learner( learner_obj,"JPM", sd, ed, impact, commission ) )
-   #import pdb; pdb.set_trace()
-
 
 if __name__ == "__main__":
-   test_manual_strategy()
+   experiment1()

@@ -239,12 +239,20 @@ def experiment2():
    #Training / in-sample: January 1, 2008 to December 31, 2009. 
    sd = dt.datetime(2008, 1, 1)
    ed = dt.datetime(2009,12,31)
-   strat_porvals = []
+   strat_portvals = []
+   legend = []
    for i in range(10):
       learner_obj = train_learner("JPM", sd, ed, impact*i, commission*i )
-      strat_porvals.append( run_strategy_learner( learner_obj,"JPM", sd, ed, impact, commission ) )
-   #import pdb; pdb.set_trace()
-
+      strat_portvals.append( run_strategy_learner( learner_obj,"JPM", sd, ed, impact, commission ) )
+      legend.append(impact*i)
+   ax = strat_portvals[0].plot()
+   for i in range( 1, len ( strat_portvals ) ):
+      print(i)
+      strat_portvals[i].plot(ax=ax)
+   plt.title('JPM chaning impact on Random Forest')
+   plt.legend(legend )
+   plt.savefig('./images/experiment2.png')
 
 if __name__ == "__main__":
-   test_manual_strategy()
+   experiment2()
+
