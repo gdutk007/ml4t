@@ -242,14 +242,16 @@ def experiment2():
    strat_portvals = []
    legend = []
    for i in range(10):
-      learner_obj = train_learner("JPM", sd, ed, impact*i, commission*i )
-      strat_portvals.append( run_strategy_learner( learner_obj,"JPM", sd, ed, impact, commission ) )
+      learner_obj = train_learner("JPM", sd, ed, impact*i, commission )
+      ret_values = run_strategy_learner( learner_obj,"JPM", sd, ed, impact, commission )
+      # ret_values = ret_values/ret_values[0]
+      strat_portvals.append( ret_values )
       legend.append(impact*i)
    ax = strat_portvals[0].plot()
    for i in range( 1, len ( strat_portvals ) ):
       print(i)
       strat_portvals[i].plot(ax=ax)
-   plt.title('JPM chaning impact on Random Forest')
+   plt.title('JPM changing impact on Random Forest')
    plt.legend(legend )
    plt.savefig('./images/experiment2.png')
 

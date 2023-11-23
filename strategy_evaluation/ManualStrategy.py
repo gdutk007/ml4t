@@ -12,6 +12,8 @@ class ManualStrategy(object):
    ms_portvals = []
    benchmark_trades = []
    benchmark_portvals = []
+   def author( self ): 
+      return 'gdutka3'
 
    def testPolicy(self, symbol, sd,ed,sv):
       dates = pd.date_range(sd, ed)

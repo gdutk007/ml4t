@@ -60,6 +60,9 @@ class StrategyLearner(object):
         self.commission = commission
         self.learner =  ln.BagLearner(learner=rt.RTLearner, 
                                 kwargs={"leaf_size":5}, bags=13, boost=False, verbose=False)
+        
+        def author( self ): 
+            return 'gdutka3'
 
     # this method should create a QLearner, and train it for trading
     def add_evidence(

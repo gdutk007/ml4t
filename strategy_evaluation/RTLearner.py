@@ -103,13 +103,20 @@ class RTLearner(object):
         return predVals
 
     def get_mode(self, data):
-        count = {}
+        mode_map = {}
+        maxnum = -1
+        maxnumCount = 0
+        # will use a map to get the mode
         for i in data:
-            if i in count:
-                count[i]+= 1
+            if i in mode_map:
+                mode_map[i]+= 1
             else:
-                count[i] = 1
-        return max(count, key=count.get)
+                mode_map[i] = 1
+            if mode_map[i] > maxnumCount:
+                maxnumCount = mode_map[i]
+                maxnum = i
+        # return mode
+        return maxnum
 
     def build_tree(self, data):
         if data.shape[0] <= self.leaf_size:
